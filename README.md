@@ -66,6 +66,36 @@ Token 申请：[open.mcd.cn/mcp](https://open.mcd.cn/mcp) → 手机号登录 �
 
 把 `SKILL.md` 放进 WorkBuddy（或其他支持 Skill 的 Agent 宿主）技能目录，配好上面的 MCP 连接即可。也可以直接阅读 `SKILL.md` 作为提示词工程参考，在任何 MCP Client 里手动复现工作流。
 
+### 可运行参考引擎（Python ≥3.11，零依赖）
+
+```bash
+# 确定性决策引擎 + MCP 薄客户端，全程只读 allowlist，写操作在代码层被拒绝
+python demo.py YOUR_MCP_TOKEN 成都市 春熙路
+```
+
+真实运行输出（2026-10-25，成都锦江区联升巷店）见 [measured/demo_output_2026-10-25.txt](measured/demo_output_2026-10-25.txt)：
+
+```
+方案1：小薯条 + 无糖可口可乐中杯 —— 官方实付 ¥14.9，热量 210 kcal
+方案2：小薯条 + 无糖可口可乐中杯 —— 官方实付 ¥13.9，热量 210 kcal   ← 同样吃法省 1 元
+方案3：小薯条 + 锡兰红茶 —— 官方实付 ¥14.9，热量 212 kcal
+```
+
+引擎设计原则：
+- **价格只认官方核价**——每桶一次 `calculate-price`（桶价恒定已实测验证），绝不心算；
+- **营养缺失如实标注**——新品（高达吉士双牛堡）不在官方营养表，输出"官方营养表暂未收录"，不用同类目冒充；
+- **门槛只过滤不放宽**——预算/热量条件不满足时输出"条件未放宽"提示，绝不偷偷降级条件。
+
+### 测试与 CI
+
+13 个确定性单元测试（fixture 为真实 MCP 响应裁剪版，离线可跑）：
+
+```bash
+python -m unittest discover -s tests -v   # 13 tests, OK
+```
+
+GitHub Actions 矩阵（Ubuntu/Windows × Python 3.11/3.13）+ 仓库凭据泄露扫描，见 [.github/workflows/ci.yml](.github/workflows/ci.yml)。
+
 ## 参赛声明
 
 见 [CONTEST_DECLARATION.md](CONTEST_DECLARATION.md)。本项目个人非商业用途，与麦当劳中国无隶属关系；所有价格数据来自官方 MCP 实时返回，仅作决策参考。
@@ -74,8 +104,14 @@ Token 申请：[open.mcd.cn/mcp](https://open.mcd.cn/mcp) → 手机号登录 �
 
 ```
 ├── SKILL.md                 # 技能主文件（含业务事实与工作流）
+├── demo.py                  # 可运行 demo（真实 Token，端到端只读链路）
+├── src/
+│   ├── mcd_client.py        # MCP 薄客户端（stdlib，只读 allowlist，写操作在代码层被拒）
+│   └── coach.py             # 确定性决策引擎（解析/营养/排序/门槛，纯函数）
+├── tests/test_coach.py      # 13 个离线确定性单元测试
+├── .github/workflows/ci.yml # CI：4 矩阵测试 + 凭据泄露扫描
 ├── CONTEST_DECLARATION.md   # 参赛声明
-├── MCP_INTEGRATION.md       # MCP 接入实测记录（35 工具快照 + 6 工具实测台账）
+├── MCP_INTEGRATION.md       # MCP 接入实测记录（35 工具快照 + 15 项实测台账）
 ├── workbuddy.md             # WorkBuddy 开发留痕
-└── measured/measured_ledger.json  # 实测数据台账（组合、价格、营养）
+└── measured/                # 实测台账 JSON + demo 真实输出（脱敏）
 ```
