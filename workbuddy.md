@@ -25,6 +25,10 @@
 - 复核全部引用的 MCP 工具：6 个只读 + 1 个领券（默认不自动触发）。
 - 确认仓库不含 Token、手机号等凭据；示例 accountId 已脱敏。
 
+## WorkBuddy 账号
+
+WorkBuddy 账号 ID：`cfa43799-bdfe-44e6-9d78-eb5173d73a42`
+
 ## 工作流说明
 
 本仓库的 README、SKILL.md、MCP_INTEGRATION.md、参赛声明均由 WorkBuddy 会话内直接生成；探针脚本与台账为会话产物的整理版本。开发过程未使用任何非公开接口或他人未授权代码。
